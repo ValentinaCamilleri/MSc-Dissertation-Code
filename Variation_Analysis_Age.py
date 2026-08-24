@@ -3,12 +3,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import statsmodels.formula.api as smf
 
-
-# ============================================================
 # 1. LOAD PARTICIPANT DATA FROM EXCEL
-# ============================================================
 
-EXCEL_FILE = r"C:\Users\Valentina\Documents\Masters_Data.xlsx"
+EXCEL_FILE = r""
 
 df = pd.read_excel(EXCEL_FILE)
 
@@ -30,14 +27,7 @@ df["Gender"] = (
     .map({"M": 0, "F": 1})
 )
 
-
-# ============================================================
 # 3. COHORT MEANS
-#
-# Age is NOT centred out because it is the predictor
-# of interest.
-# ============================================================
-
 mean_gender = df["Gender"].mean()
 mean_bmi = df["BMI"].mean()
 
@@ -49,11 +39,7 @@ print("=" * 65)
 print(f"Gender mean = {mean_gender:.3f}")
 print(f"BMI mean    = {mean_bmi:.3f}")
 
-
-# ============================================================
 # 4. DEFINE ALL OUTCOMES
-# ============================================================
-
 outcomes = [
 
     # T2
@@ -78,18 +64,11 @@ outcomes = [
     "FA_LTC"
 ]
 
-
-# ============================================================
 # 5. FIT MULTIVARIABLE AGE MODELS
-#
 # qMRI outcome ~ Age + Gender + BMI
-#
 # Age is the predictor of interest.
-# ============================================================
 
 models = {}
-
-
 for outcome in outcomes:
 
     model = smf.ols(
@@ -99,23 +78,8 @@ for outcome in outcomes:
 
     models[outcome] = model
 
-
-# ============================================================
 # 6. CREATE PARTICIPANT-LEVEL VALUES ADJUSTED FOR
 #    GENDER AND BMI
-#
-# AGE IS RETAINED.
-#
-# Y_adj =
-#
-# Y
-# - beta_gender  * (Gender - mean Gender)
-# - beta_BMI  * (BMI - mean BMI)
-#
-# This leaves:
-#   age-related variation
-#   residual participant variation
-# ============================================================
 
 def create_age_adjusted_values(outcome, model):
 
@@ -130,7 +94,6 @@ def create_age_adjusted_values(outcome, model):
         * (df["BMI"] - mean_bmi)
     )
 
-
 for outcome in outcomes:
 
     df[f"{outcome}_Age_Adjusted"] = (
@@ -140,10 +103,7 @@ for outcome in outcomes:
         )
     )
 
-
-# ============================================================
 # 7. PRINT PARTICIPANT-LEVEL AGE-ADJUSTED T2 VALUES
-# ============================================================
 
 t2_display = df[[
     "Code",
@@ -155,7 +115,6 @@ t2_display = df[[
     "T2_LTC_Age_Adjusted"
 ]].copy()
 
-
 t2_display.columns = [
     "Code",
     "Age",
@@ -165,7 +124,6 @@ t2_display.columns = [
     "MTC",
     "LTC"
 ]
-
 
 print("\n" + "=" * 100)
 print("AGE ANALYSIS: PARTICIPANT-LEVEL ADJUSTED T2 VALUES")
@@ -186,10 +144,7 @@ print(
     )
 )
 
-
-# ============================================================
 # 8. PRINT PARTICIPANT-LEVEL AGE-ADJUSTED MD VALUES
-# ============================================================
 
 md_display = df[[
     "Code",
@@ -232,11 +187,7 @@ print(
     )
 )
 
-
-# ============================================================
 # 9. PRINT PARTICIPANT-LEVEL AGE-ADJUSTED FA VALUES
-# ============================================================
-
 fa_display = df[[
     "Code",
     "Age",
@@ -247,7 +198,6 @@ fa_display = df[[
     "FA_LTC_Age_Adjusted"
 ]].copy()
 
-
 fa_display.columns = [
     "Code",
     "Age",
@@ -257,7 +207,6 @@ fa_display.columns = [
     "MTC",
     "LTC"
 ]
-
 
 print("\n" + "=" * 100)
 print("AGE ANALYSIS: PARTICIPANT-LEVEL ADJUSTED FA VALUES")
@@ -278,18 +227,11 @@ print(
     )
 )
 
-
-# ============================================================
 # 10. PRINT AGE REGRESSION RESULTS
-#
-# B = expected qMRI change per 1-year increase in age,
-# adjusted for Gender and BMI.
-# ============================================================
 
 print("\n" + "=" * 100)
 print("ADJUSTED AGE REGRESSION RESULTS")
 print("=" * 100)
-
 
 for outcome in outcomes:
 
@@ -303,11 +245,7 @@ for outcome in outcomes:
         f"95% CI = {ci.iloc[0]:8.4f} to {ci.iloc[1]:8.4f} | "
         f"p = {model.pvalues['Age']:.4f}"
     )
-
-
-# ============================================================
 # 11. FIGURE STYLE
-# ============================================================
 
 plt.rcParams.update({
     "font.family": "Arial",
@@ -319,14 +257,12 @@ plt.rcParams.update({
     "axes.linewidth": 0.8
 })
 
-
 def format_p(p):
 
     if p < 0.001:
         return r"$p < 0.001$"
 
     return rf"$p = {p:.3f}$"
-
 
 def style_axis(ax):
 
@@ -353,13 +289,7 @@ def style_axis(ax):
     ax.set_axisbelow(True)
 
 
-# ============================================================
 # 12. MODEL-BASED AGE PREDICTIONS + 95% CI
-#
-# Predictions come from the full multivariable OLS model.
-#
-# Gender and BMI are held at cohort means.
-# ============================================================
 
 def get_age_prediction(model, x_pred):
 
@@ -411,10 +341,7 @@ def get_age_prediction(model, x_pred):
         upper
     )
 
-
-# ============================================================
 # 13. GLOBAL AGE PANEL
-# ============================================================
 
 def global_panel(
     ax,
@@ -444,7 +371,6 @@ def global_panel(
         6
     )
 
-
     # --------------------------------------------------------
     # Model-based predicted means + 95% CI
     # --------------------------------------------------------
@@ -461,7 +387,6 @@ def global_panel(
         y_pred - lower,
         upper - y_pred
     ])
-
 
     # --------------------------------------------------------
     # Individual participant adjusted values
@@ -482,7 +407,6 @@ def global_panel(
         zorder=1
     )
 
-
     # --------------------------------------------------------
     # Model-based trend line
     # --------------------------------------------------------
@@ -496,7 +420,6 @@ def global_panel(
 
         zorder=2
     )
-
 
     # --------------------------------------------------------
     # Model-based means + 95% CI
@@ -524,7 +447,6 @@ def global_panel(
         zorder=3
     )
 
-
     # --------------------------------------------------------
     # Axes
     # --------------------------------------------------------
@@ -544,7 +466,6 @@ def global_panel(
 
     style_axis(ax)
 
-
     # --------------------------------------------------------
     # Adjusted p-value
     # --------------------------------------------------------
@@ -563,7 +484,6 @@ def global_panel(
         fontsize=10
     )
 
-
     # --------------------------------------------------------
     # Panel label
     # --------------------------------------------------------
@@ -580,9 +500,7 @@ def global_panel(
         fontweight="bold"
     )
 
-
     return p
-
 
 # ============================================================
 # 14. GLOBAL AGE FIGURE
@@ -590,18 +508,15 @@ def global_panel(
 
 AGE = df["Age"].to_numpy()
 
-
 fig, axes = plt.subplots(
     1,
     3,
     figsize=(10.8, 4.2)
 )
 
-
 print("\n" + "=" * 70)
 print("GLOBAL ADJUSTED AGE ASSOCIATIONS")
 print("=" * 70)
-
 
 # ------------------------------------------------------------
 # T2
@@ -630,7 +545,6 @@ print(
     f"T2: adjusted Age p = {p:.4f}"
 )
 
-
 # ------------------------------------------------------------
 # MD
 # ------------------------------------------------------------
@@ -653,11 +567,9 @@ p = global_panel(
     "b"
 )
 
-
 print(
     f"MD: adjusted Age p = {p:.4f}"
 )
-
 
 # ------------------------------------------------------------
 # FA
@@ -681,16 +593,13 @@ p = global_panel(
     "c"
 )
 
-
 print(
     f"FA: adjusted Age p = {p:.4f}"
 )
 
-
 plt.tight_layout(
     w_pad=2.2
 )
-
 
 plt.savefig(
     "Age_Global_Adjusted_qMRI.png",
@@ -699,9 +608,7 @@ plt.savefig(
     pad_inches=0.08
 )
 
-
 plt.show()
-
 
 # ============================================================
 # 15. REGIONAL AGE-ADJUSTED DATA
@@ -754,7 +661,6 @@ regional_FA = {
         df["FA_LTC_Age_Adjusted"].to_numpy()
 }
 
-
 # ============================================================
 # 16. REGIONAL MODELS
 # ============================================================
@@ -769,7 +675,6 @@ regional_T2_models = {
     ]
 }
 
-
 regional_MD_models = {
     region: models[f"MD_{region}"]
     for region in [
@@ -780,7 +685,6 @@ regional_MD_models = {
     ]
 }
 
-
 regional_FA_models = {
     region: models[f"FA_{region}"]
     for region in [
@@ -790,7 +694,6 @@ regional_FA_models = {
         "LTC"
     ]
 }
-
 
 # ============================================================
 # 17. REGIONAL LINE STYLES
