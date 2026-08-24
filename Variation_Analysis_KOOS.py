@@ -8,7 +8,7 @@ import statsmodels.api as sm
 # 1. LOAD PARTICIPANT DATA
 # ============================================================
 
-EXCEL_FILE = r"C:\Users\Valentina\Documents\Masters_Data.xlsx"
+EXCEL_FILE = r""
 
 df = pd.read_excel(EXCEL_FILE)
 
